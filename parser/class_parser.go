@@ -8,7 +8,7 @@ containing the information it needs to Render the class diagram.
 
 call the Render() function and this will return a string with the class diagram.
 
-See github.com/jfeliu007/goplantuml/cmd/goplantuml/main.go for a command that uses this functions and outputs the text to
+See github.com/ravi-palakodeti/goplantuml/cmd/goplantuml/main.go for a command that uses this functions and outputs the text to
 the console.
 
 */
@@ -62,6 +62,7 @@ type ClassDiagramOptions struct {
 type RenderingOptions struct {
 	Title                   string
 	Notes                   string
+	Commands                string
 	Aggregations            bool
 	Fields                  bool
 	Methods                 bool
@@ -107,6 +108,9 @@ const AggregatePrivateMembers = 9
 //RenderingOption is an alias for an it so it is easier to use it as options in a map (see SetRenderingOptions(map[RenderingOption]bool) error)
 type RenderingOption int
 
+//RenderCommands is a comma separated list of plantuml commands that is added to the top of the image to control rendering (eg: skinparam)
+const RenderCommands = 10
+
 //ClassParser contains the structure of the parsed files. The structure is a map of package_names that contains
 //a map of structure_names -> Structs
 type ClassParser struct {
@@ -135,6 +139,7 @@ func NewClassDiagramWithOptions(options *ClassDiagramOptions) (*ClassParser, err
 			ConnectionLabels: false,
 			Title:            "",
 			Notes:            "",
+			Commands:         "",
 		},
 		structure:         make(map[string]map[string]*Struct),
 		allInterfaces:     make(map[string]struct{}),
@@ -399,6 +404,16 @@ func (p *ClassParser) Render() string {
 		str.WriteLineWithDepth(0, "legend")
 		str.WriteLineWithDepth(0, note)
 		str.WriteLineWithDepth(0, "end legend")
+	}
+
+	if commandString := strings.TrimSpace(p.renderingOptions.Commands); commandString != "" {
+
+		commands := strings.Split(commandString, ",")
+		str.WriteLineWithDepth(0, "")
+		for _, command := range commands {
+			str.WriteLineWithDepth(0, strings.TrimSpace(command))
+		}
+		str.WriteLineWithDepth(0, "")
 	}
 
 	var packages []string
@@ -709,6 +724,8 @@ func (p *ClassParser) SetRenderingOptions(ro map[RenderingOption]interface{}) er
 			p.renderingOptions.Notes = val.(string)
 		case AggregatePrivateMembers:
 			p.renderingOptions.AggregatePrivateMembers = val.(bool)
+		case RenderCommands:
+			p.renderingOptions.Commands = val.(string)
 		default:
 			return fmt.Errorf("Invalid Rendering option %v", option)
 		}

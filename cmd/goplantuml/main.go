@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	goplantuml "github.com/jfeliu007/goplantuml/parser"
+	goplantuml "github.com/ravi-palakodeti/goplantuml/parser"
 )
 
 //RenderingOptionSlice will implements the sort interface
@@ -44,6 +44,7 @@ func main() {
 	showAliases := flag.Bool("show-aliases", false, "Shows aliases even when -hide-connections is used")
 	showConnectionLabels := flag.Bool("show-connection-labels", false, "Shows labels in the connections to identify the connections types (e.g. extends, implements, aggregates, alias of")
 	title := flag.String("title", "", "Title of the generated diagram")
+	commands := flag.String("commands", "", "comma separated plantuml commands eg: skinparam, direction, linetype")
 	notes := flag.String("notes", "", "Comma separated list of notes to be added to the diagram")
 	output := flag.String("output", "", "output file path. If omitted, then this will default to standard output")
 	showOptionsAsNote := flag.Bool("show-options-as-note", false, "Show a note in the diagram with the none evident options ran with this CLI")
@@ -55,6 +56,7 @@ func main() {
 		goplantuml.RenderMethods:           !*hideMethods,
 		goplantuml.RenderAggregations:      *showAggregations,
 		goplantuml.RenderTitle:             *title,
+		goplantuml.RenderCommands:          *commands,
 		goplantuml.AggregatePrivateMembers: *aggregatePrivateMembers,
 	}
 	if *hideConnections {
